@@ -40,7 +40,7 @@ Each field goes through `Controller`:
 
 Submit: `<form onSubmit={handleSubmit(handler)} noValidate>`. Button disabled while submitting with icon toggle.
 
-See existing examples under `src/components/Auth/`.
+See existing examples under `src/components/Task/` and `src/components/shadcnui/`.
 
 <!-- END:form-patterns -->
 
@@ -94,6 +94,7 @@ See existing examples under `src/components/Auth/`.
 
 - `components.json` sets `ui` → `@/components/shadcnui` (not the default `@/components/ui`). Add components with `bunx shadcn add ...`; they land in `src/components/shadcnui/`.
 - The shipped `Button` wraps `Button as ButtonPrimitive` from `@base-ui/react/button`. Do not introduce Radix or `react-aria` primitives — they don't share the Base Luma styling.
+- **PopoverTrigger `render` prop:** Base UI's `PopoverTrigger` renders a `<button>` by default. Wrapping a shadcn `Button` (which also renders `<button>`) inside `PopoverTrigger` causes a hydration error ("`<button>` cannot be a descendant of `<button>`"). Fix: add `render={<span />}` to `PopoverTrigger` so it renders as a `<span>` instead. See `src/components/shadcnui/popover.tsx`.
 
 ## Path aliases (`tsconfig.json`)
 
