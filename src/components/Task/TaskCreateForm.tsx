@@ -1,21 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { Flag, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Flag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-import { createTaskSchema, type CreateTaskFormData } from "@/lib/zodSchema";
 import { Button } from "@/components/shadcnui/button";
-import { Input } from "@/components/shadcnui/input";
-import { Textarea } from "@/components/shadcnui/textarea";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/shadcnui/select";
 import { Calendar } from "@/components/shadcnui/calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/shadcnui/popover";
-import { Field, FieldLabel, FieldError } from "@/components/shadcnui/field";
+import { Field, FieldError, FieldLabel } from "@/components/shadcnui/field";
+import { Input } from "@/components/shadcnui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcnui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcnui/select";
+import { Textarea } from "@/components/shadcnui/textarea";
+import { createTaskSchema, type CreateTaskFormData } from "@/lib/zodSchema";
+import { getProjects } from "@/server/projects";
 import { createTask } from "@/server/tasks";
 
 const priorityOptions = [
@@ -27,6 +38,17 @@ const priorityOptions = [
 export default function TaskCreateForm() {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [projects, setProjects] = useState<
+    Awaited<ReturnType<typeof getProjects>>
+  >([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+
+  useEffect(() => {
+    getProjects()
+      .then(setProjects)
+      .catch(() => toast.error("Failed to load projects"))
+      .finally(() => setLoadingProjects(false));
+  }, []);
 
   const {
     handleSubmit,
@@ -54,12 +76,17 @@ export default function TaskCreateForm() {
       toast.success("Task created successfully");
       router.push("/tasks");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create task");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create task",
+      );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="flex flex-col gap-6">
       <Controller
         name="title"
         control={control}
@@ -100,8 +127,11 @@ export default function TaskCreateForm() {
         control={control}
         render={({ field }) => {
           const currentValue = field.value || "MEDIUM";
-          const currentIndex = priorityOptions.findIndex((p) => p.value === currentValue);
-          const nextPriority = priorityOptions[(currentIndex + 1) % priorityOptions.length];
+          const currentIndex = priorityOptions.findIndex(
+            (p) => p.value === currentValue,
+          );
+          const nextPriority =
+            priorityOptions[(currentIndex + 1) % priorityOptions.length];
 
           return (
             <Field>
@@ -110,8 +140,7 @@ export default function TaskCreateForm() {
                 type="button"
                 variant="outline"
                 onClick={() => field.onChange(nextPriority.value)}
-                disabled={isSubmitting}
-              >
+                disabled={isSubmitting}>
                 <nextPriority.icon className={nextPriority.color} />
                 {nextPriority.label}
               </Button>
@@ -129,14 +158,37 @@ export default function TaskCreateForm() {
             <Select
               value={field.value}
               onValueChange={field.onChange}
-              disabled={isSubmitting}
-            >
-              <SelectTrigger id={field.name} aria-invalid={fieldState.invalid}>
-                <SelectValue placeholder="Select a project" />
+              disabled={isSubmitting || loadingProjects}>
+              <SelectTrigger
+                id={field.name}
+                aria-invalid={fieldState.invalid}>
+                <SelectValue
+                  placeholder={
+                    loadingProjects ? "Loading projects..." : "Select a project"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="project-1">Project 1</SelectItem>
-                <SelectItem value="project-2">Project 2</SelectItem>
+                {projects.length === 0 ?
+                  <SelectItem
+                    value=""
+                    disabled>
+                    No projects available
+                  </SelectItem>
+                : projects.map((project) => (
+                    <SelectItem
+                      key={project.id}
+                      value={project.id}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="inline-block h-3 w-3 rounded-full"
+                          style={{ backgroundColor: project.color }}
+                        />
+                        {project.name}
+                      </span>
+                    </SelectItem>
+                  ))
+                }
               </SelectContent>
             </Select>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -156,10 +208,11 @@ export default function TaskCreateForm() {
                   type="button"
                   variant="outline"
                   className="w-full justify-start text-left"
-                  disabled={isSubmitting}
-                >
+                  disabled={isSubmitting}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {field.value ? format(new Date(field.value), "PPP") : "Pick a date"}
+                  {field.value ?
+                    format(new Date(field.value), "PPP")
+                  : "Pick a date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -177,7 +230,9 @@ export default function TaskCreateForm() {
         )}
       />
 
-      <Button type="submit" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        disabled={isSubmitting}>
         {isSubmitting ? "Creating..." : "Create Task"}
       </Button>
     </form>
