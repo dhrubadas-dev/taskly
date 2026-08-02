@@ -18,7 +18,7 @@ const PrivateLayout = async ({ children }: PrivateLayoutProps) => {
   return (
     <>
       <Header />
-      {children}
+      <div className="pt-16">{children}</div>
     </>
   );
 };

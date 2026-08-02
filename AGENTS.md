@@ -100,6 +100,12 @@ See existing examples under `src/components/Task/` and `src/components/shadcnui/
 - The shipped `Button` wraps `Button as ButtonPrimitive` from `@base-ui/react/button`. Do not introduce Radix or `react-aria` primitives — they don't share the Base Luma styling.
 - **PopoverTrigger `render` prop:** Base UI's `PopoverTrigger` renders a `<button>` by default. Wrapping a shadcn `Button` (which also renders `<button>`) inside `PopoverTrigger` causes a hydration error ("`<button>` cannot be a descendant of `<button>`"). Fix: add `render={<span />}` to `PopoverTrigger` so it renders as a `<span>` instead. See `src/components/shadcnui/popover.tsx`.
 
+## Layout / Header
+
+- `src/components/Header/Header.tsx` is `fixed top-0` with a frost/glass effect (`bg-background/70 backdrop-blur-xl backdrop-saturate-150 border-border/50`). Because it's fixed, page content in `src/app/(private)/layout.tsx` is wrapped in `<div className="pt-16">` to offset the header height — without this, content slides under the header. Keep this offset in sync if the header's `py-3` padding changes.
+- The frost effect uses `bg-background/70` (semi-transparent) + `backdrop-blur-xl` + `backdrop-saturate-150`. Reuse this combo for other sticky/frosted surfaces; don't switch to a solid `bg-background` or the blur won't show.
+- Header nav order: nav links first, then a `bg-border mx-1 h-6 w-px` divider, then action buttons (`ThemeToggleButton`, then `LogoutButton` last). The `LogoutButton` must always be the final element in the header — it's the destructive/terminal action and belongs at the far end. Don't insert anything after it.
+
 ## Path aliases (`tsconfig.json`)
 
 - `@/*` → `./src/*`
