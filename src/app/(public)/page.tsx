@@ -21,7 +21,7 @@ const LoginPage = () => {
         <LoginForm />
 
         <p className="text-muted-foreground text-center text-sm">
-          Don't have an account?{" "}
+          {"Don't have an account? "}
           <Link
             href="/register"
             className="text-primary font-medium underline-offset-4 hover:underline">

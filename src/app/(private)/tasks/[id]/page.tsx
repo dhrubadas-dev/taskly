@@ -7,9 +7,9 @@ type TaskDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: TaskDetailPageProps): Promise<Metadata> {
+}: TaskDetailPageProps): Promise<Metadata> => {
   try {
     const { id } = await params;
     const task = await getTaskById(id);
@@ -20,19 +20,22 @@ export async function generateMetadata({
   } catch {
     return { title: "Task Not Found - Taskly" };
   }
-}
+};
 
-export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
+const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
   const { id } = await params;
 
-  try {
-    const task = await getTaskById(id);
-    return (
-      <div className="container mx-auto max-w-2xl py-8">
-        <TaskDetail task={task} />
-      </div>
-    );
-  } catch {
+  const task = await getTaskById(id).catch(() => null);
+
+  if (!task) {
     notFound();
   }
-}
+
+  return (
+    <div className="container mx-auto max-w-2xl py-8">
+      <TaskDetail task={task} />
+    </div>
+  );
+};
+
+export default TaskDetailPage;

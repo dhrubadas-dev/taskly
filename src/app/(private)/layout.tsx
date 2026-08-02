@@ -1,3 +1,4 @@
+import Header from "@/components/Header/Header";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -14,7 +15,12 @@ const PrivateLayout = async ({ children }: PrivateLayoutProps) => {
     redirect("/");
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <Header />
+      {children}
+    </>
+  );
 };
 
 export default PrivateLayout;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoutButton from "../Buttons/LogoutButton";
 import ThemeToggleButton from "../Buttons/ThemeToggleButton";
 
 const Header = () => {
@@ -11,17 +12,17 @@ const Header = () => {
           <h1
             className="text-2xl font-semibold"
             aria-label="App Name">
-            NSF App
+            Taskly
           </h1>
         </Link>
 
         <nav className="flex items-center gap-4">
-          <Link href={"/"}>Home</Link>
           <Link href={"/tasks"}>Tasks</Link>
           <Link href={"/projects"}>Projects</Link>
           <Link href={"/tasks/new"}>New Task</Link>
 
           <ThemeToggleButton />
+          <LogoutButton />
         </nav>
       </div>
     </header>

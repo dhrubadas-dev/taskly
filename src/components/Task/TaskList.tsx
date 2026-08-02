@@ -35,11 +35,10 @@ type TaskListProps = {
   initialData: Awaited<ReturnType<typeof getTasks>>;
 };
 
-export default function TaskList({ initialData }: TaskListProps) {
+const TaskList = ({ initialData }: TaskListProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentPage = Number(searchParams.get("page") || "1");
   const currentSort = searchParams.get("sort") || "dueDate";
   const currentOrder = (searchParams.get("order") as SortOrder) || "asc";
 
@@ -158,4 +157,6 @@ export default function TaskList({ initialData }: TaskListProps) {
       )}
     </div>
   );
-}
+};
+
+export default TaskList;

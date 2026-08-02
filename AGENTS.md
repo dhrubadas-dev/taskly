@@ -84,6 +84,10 @@ See existing examples under `src/components/Task/` and `src/components/shadcnui/
 - `next.config.ts` imports both env files **as side effects** at the top of the module to trigger validation at load time. Do not remove those imports; the rest of the app reads `serverEnv` / `clientEnv` from those modules.
 - New vars: add to `serverEnv.ts` (server) or `clientEnv.ts` (must be `NEXT_PUBLIC_*`) and mirror in `.env.example`.
 
+## Code style
+
+- **Arrow functions over function declarations.** Use `const Foo = () => { ... }` / `const Foo = async () => { ... }` instead of `function Foo() { ... }` everywhere in the app **except** `src/components/shadcnui/` (those files follow the shadcn registry source as-is). This includes component definitions, server/page components, and named exports like `generateMetadata` (`export const generateMetadata = async () => { ... }`).
+
 ## Styling
 
 - Tailwind v4: all config lives in `src/app/globals.css` via `@theme` and `@custom-variant`. PostCSS plugin is `@tailwindcss/postcss`. There is no `tailwind.config.ts` — do not create one.

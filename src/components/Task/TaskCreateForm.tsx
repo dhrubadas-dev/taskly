@@ -35,9 +35,8 @@ const priorityOptions = [
   { value: "LOW", label: "Low", icon: Flag, color: "text-green-500" },
 ] as const;
 
-export default function TaskCreateForm() {
+const TaskCreateForm = () => {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [projects, setProjects] = useState<
     Awaited<ReturnType<typeof getProjects>>
   >([]);
@@ -221,7 +220,6 @@ export default function TaskCreateForm() {
                   selected={field.value ? new Date(field.value) : undefined}
                   onSelect={(date) => {
                     field.onChange(date);
-                    setSelectedDate(date);
                   }}
                 />
               </PopoverContent>
@@ -237,4 +235,6 @@ export default function TaskCreateForm() {
       </Button>
     </form>
   );
-}
+};
+
+export default TaskCreateForm;
