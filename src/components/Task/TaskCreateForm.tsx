@@ -164,8 +164,20 @@ const TaskCreateForm = () => {
                 <SelectValue
                   placeholder={
                     loadingProjects ? "Loading projects..." : "Select a project"
-                  }
-                />
+                  }>
+                  {(value) => {
+                    const project = projects.find((p) => p.id === value);
+                    return project ?
+                        <span className="flex items-center gap-2">
+                          <span
+                            className="inline-block h-3 w-3 rounded-full"
+                            style={{ backgroundColor: project.color }}
+                          />
+                          {project.name}
+                        </span>
+                      : null;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {projects.length === 0 ?
