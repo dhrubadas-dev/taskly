@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader/PageHeader";
 import TaskList from "@/components/Task/TaskList";
 import { getTasks } from "@/server/tasks";
 import { Metadata } from "next";
@@ -27,7 +28,10 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
   return (
     <div className="container mx-auto max-w-2xl py-8">
-      <h1 className="mb-6 text-2xl font-bold">Tasks</h1>
+      <PageHeader
+        title="Tasks"
+        description="View and manage your tasks"
+      />
       <TaskList initialData={initialData} />
     </div>
   );

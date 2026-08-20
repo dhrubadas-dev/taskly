@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader/PageHeader";
 import ProjectList from "@/components/Project/ProjectList";
 import { getProjects } from "@/server/projects";
 import { Metadata } from "next";
@@ -12,7 +13,10 @@ export default async function ProjectsPage() {
 
   return (
     <div className="container mx-auto max-w-2xl py-8">
-      <h1 className="mb-6 text-2xl font-bold">Projects</h1>
+      <PageHeader
+        title="Projects"
+        description="Organize your tasks into projects"
+      />
       <ProjectList projects={projects} />
     </div>
   );

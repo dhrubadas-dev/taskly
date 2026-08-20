@@ -63,7 +63,7 @@ export default function TaskDetail({ task }: TaskDetailProps) {
       </Link>
 
       {/* Title and actions */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div className="space-y-1">
           <h1
             className={`text-2xl font-semibold ${

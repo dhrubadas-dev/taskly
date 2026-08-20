@@ -78,9 +78,9 @@ const TaskList = ({ initialData }: TaskListProps) => {
   const sortValue = `${currentSort}-${currentOrder}`;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Sort controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm">
           {total === 0 ? "No tasks" : `${total} task${total !== 1 ? "s" : ""}`}
         </p>
@@ -108,8 +108,10 @@ const TaskList = ({ initialData }: TaskListProps) => {
 
       {/* Task list */}
       {tasks.length === 0 ?
-        <div className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-center">
-          <ListOrdered className="h-12 w-12 opacity-30" />
+        <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-xl border border-dashed py-12 text-center">
+          <span className="bg-primary/10 text-primary flex size-14 items-center justify-center rounded-full">
+            <ListOrdered className="size-7" />
+          </span>
           <p className="text-lg font-medium">No tasks yet</p>
           <p className="text-sm">Create your first task to get started.</p>
         </div>
@@ -127,7 +129,7 @@ const TaskList = ({ initialData }: TaskListProps) => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t pt-4">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground hidden text-sm sm:block">
             Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, total)} of{" "}
             {total}
           </p>

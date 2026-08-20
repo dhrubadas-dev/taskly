@@ -36,7 +36,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
           {projects.length === 0 ?
@@ -48,14 +48,16 @@ export default function ProjectList({ projects }: ProjectListProps) {
           type="button"
           variant="default"
           onClick={() => startTransition(() => router.push("/projects/new"))}>
-          <FolderPlus className="mr-2 h-4 w-4" />
+          <FolderPlus data-icon="inline-start" />
           New Project
         </Button>
       </div>
 
       {projects.length === 0 ?
-        <div className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-center">
-          <FolderPlus className="h-12 w-12 opacity-30" />
+        <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-xl border border-dashed py-12 text-center">
+          <span className="bg-primary/10 text-primary flex size-14 items-center justify-center rounded-full">
+            <FolderPlus className="size-7" />
+          </span>
           <p className="text-lg font-medium">No projects yet</p>
           <p className="text-sm">
             Create your first project to organize tasks.
@@ -65,7 +67,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
           {projects.map((project) => (
             <div
               key={project.id}
-              className="bg-card text-card-foreground flex items-center justify-between rounded-xl border px-4 py-3">
+              className="bg-card text-card-foreground hover:border-primary/30 flex items-center justify-between rounded-xl border px-4 py-3 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div
                   className="h-4 w-4 rounded-full"
@@ -86,14 +88,14 @@ export default function ProjectList({ projects }: ProjectListProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleEdit(project.id)}>
-                  <FolderPen className="h-4 w-4" />
+                  <FolderPen />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDelete(project.id, project.name)}>
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="text-red-500" />
                 </Button>
               </div>
             </div>

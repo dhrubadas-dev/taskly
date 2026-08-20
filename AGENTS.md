@@ -65,6 +65,10 @@ See existing examples under `src/components/Task/` and `src/components/shadcnui/
 - **Secondary / type gate**: `bun run build`. There is no separate `typecheck` script and no test framework; TypeScript errors surface only during the build.
 - **Full prod check**: `bun prod` — `prisma generate && eslint && next build && next start`. Use before schema or env changes.
 
+### Known ESLint issue (as of 8/2026)
+
+`bun lint` currently crashes with `TypeError: Error while loading rule 'react/display-name': contextOrFilename.getFilename is not a function` — an incompatibility between `eslint-plugin-react` and ESLint 10.6.0. It fails while loading the rule itself, before linting any file, so it's an environment issue, not a code problem. The type gate still works: `bun lint` runs `tsc --noEmit` first (which passes), and `bun run build` also runs full TypeScript checking. Use `bun run build` as the reliable verification until the plugin is updated.
+
 ## Prisma (Prisma 7, custom output)
 
 - Generator: `provider = "prisma-client"`, `output = "../generated/prisma"`. This is the Prisma 7 generator, **not** `prisma-client-js`.
@@ -99,6 +103,7 @@ See existing examples under `src/components/Task/` and `src/components/shadcnui/
 - `components.json` sets `ui` → `@/components/shadcnui` (not the default `@/components/ui`). Add components with `bunx shadcn add ...`; they land in `src/components/shadcnui/`.
 - The shipped `Button` wraps `Button as ButtonPrimitive` from `@base-ui/react/button`. Do not introduce Radix or `react-aria` primitives — they don't share the Base Luma styling.
 - **PopoverTrigger `render` prop:** Base UI's `PopoverTrigger` renders a `<button>` by default. Wrapping a shadcn `Button` (which also renders `<button>`) inside `PopoverTrigger` causes a hydration error ("`<button>` cannot be a descendant of `<button>`"). Fix: add `render={<span />}` to `PopoverTrigger` so it renders as a `<span>` instead. See `src/components/shadcnui/popover.tsx`.
+- **SheetTrigger `render` prop:** Same nested-button issue applies to `SheetTrigger` (Base UI Dialog). To use a shadcn `Button` as the trigger, pass `render={<Button ... />}` to `SheetTrigger` and put the icon as a child. See `src/components/Header/Header.tsx` (mobile menu).
 
 ## Layout / Header
 

@@ -56,9 +56,10 @@ export default function TaskListItem({ task, onToggle }: TaskListItemProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors",
+        "flex items-center gap-3 rounded-lg border px-4 py-3 transition-all",
         optimisticCompleted && "bg-muted/30",
-        !optimisticCompleted && "bg-card",
+        !optimisticCompleted &&
+          "bg-card hover:border-primary/30 hover:shadow-sm",
       )}>
       <Checkbox
         checked={optimisticCompleted}
@@ -104,14 +105,14 @@ export default function TaskListItem({ task, onToggle }: TaskListItemProps) {
         )}
 
         {task.subtasks.length > 0 && (
-          <span className="text-muted-foreground text-xs whitespace-nowrap">
+          <span className="text-muted-foreground hidden text-xs whitespace-nowrap sm:inline">
             {task.subtasks.filter((s) => s.completed).length}/
             {task.subtasks.length}
           </span>
         )}
 
         <span
-          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+          className="hidden items-center rounded-full px-2 py-0.5 text-xs font-medium sm:inline-flex"
           style={{
             backgroundColor: `${task.project.color}20`,
             color: task.project.color,
