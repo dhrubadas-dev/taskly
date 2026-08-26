@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@/components/shadcnui/button";
+import SubtaskList from "@/components/Task/SubtaskList";
+import { Button, buttonVariants } from "@/components/shadcnui/button";
 import { cn } from "@/lib/utils";
 import { deleteTask, getTaskById } from "@/server/tasks";
 import { format } from "date-fns";
@@ -8,8 +9,8 @@ import {
   ArrowLeft,
   Calendar,
   CircleCheck,
-  CircleDot,
   Flag,
+  Pencil,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -49,9 +50,6 @@ export default function TaskDetail({ task }: TaskDetailProps) {
     }
   };
 
-  const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
-  const totalSubtasks = task.subtasks.length;
-
   return (
     <div className="space-y-6">
       {/* Back button */}
@@ -80,15 +78,23 @@ export default function TaskDetail({ task }: TaskDetailProps) {
         </div>
 
         {!showConfirm ?
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowConfirm(true)}
-            disabled={isDeleting}>
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/tasks/${task.id}/edit`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}>
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Link>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowConfirm(true)}
+              disabled={isDeleting}>
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
+          </div>
         : <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -178,39 +184,10 @@ export default function TaskDetail({ task }: TaskDetailProps) {
       )}
 
       {/* Subtasks */}
-      {totalSubtasks > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-              Subtasks
-            </p>
-            <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
-              {completedSubtasks}/{totalSubtasks}
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {task.subtasks.map((subtask) => (
-              <div
-                key={subtask.id}
-                className="flex items-center gap-2 rounded-lg border px-3 py-2">
-                {subtask.completed ?
-                  <CircleCheck className="h-4 w-4 shrink-0 text-green-500" />
-                : <CircleDot className="text-muted-foreground h-4 w-4 shrink-0" />
-                }
-                <span
-                  className={`text-sm ${
-                    subtask.completed ?
-                      "text-muted-foreground line-through"
-                    : ""
-                  }`}>
-                  {subtask.title}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <SubtaskList
+        taskId={task.id}
+        initialSubtasks={task.subtasks}
+      />
     </div>
   );
 }

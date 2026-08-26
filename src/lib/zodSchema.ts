@@ -23,6 +23,22 @@ export const updateTaskSchema = z.object({
 
 export type UpdateTaskFormData = z.infer<typeof updateTaskSchema>;
 
+export const editTaskFormSchema = z.object({
+  title: z.string().min(1, "Title is required").max(255),
+  description: z.string().max(5000).optional(),
+  priority: priorityEnum,
+  dueDate: z.date().nullable().optional(),
+  projectId: z.string().min(1, "Project is required"),
+});
+
+export type EditTaskFormData = z.infer<typeof editTaskFormSchema>;
+
+export const subtaskSchema = z.object({
+  title: z.string().min(1, "Subtask title is required").max(255),
+});
+
+export type SubtaskFormData = z.infer<typeof subtaskSchema>;
+
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
