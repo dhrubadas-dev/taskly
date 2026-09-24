@@ -9,26 +9,21 @@ import {
   SelectValue,
 } from "@/components/shadcnui/select";
 import { getTasks, toggleTaskCompletion } from "@/server/tasks";
-import {
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  ListOrdered,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, ListOrdered } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
 import TaskListItem from "./TaskListItem";
 
-type SortField = "dueDate" | "priority" | "createdAt";
-type SortOrder = "asc" | "desc";
+type FilterPreset =
+  "urgent" | "today" | "yesterday" | "upcoming" | "no-date" | "all";
 
-const sortOptions: { value: string; label: string }[] = [
-  { value: "dueDate-asc", label: "Due Date ↑" },
-  { value: "dueDate-desc", label: "Due Date ↓" },
-  { value: "priority-asc", label: "Priority ↑" },
-  { value: "priority-desc", label: "Priority ↓" },
-  { value: "createdAt-asc", label: "Created ↑" },
-  { value: "createdAt-desc", label: "Created ↓" },
+const filterOptions: { value: FilterPreset; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "urgent", label: "Urgent" },
+  { value: "today", label: "Today" },
+  { value: "yesterday", label: "Yesterday" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "no-date", label: "No Date" },
 ];
 
 type TaskListProps = {
@@ -39,8 +34,9 @@ const TaskList = ({ initialData }: TaskListProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const currentFilter = (searchParams.get("filter") as FilterPreset) || "all";
   const currentSort = searchParams.get("sort") || "dueDate";
-  const currentOrder = (searchParams.get("order") as SortOrder) || "asc";
+  const currentOrder = (searchParams.get("order") as "asc" | "desc") || "asc";
 
   const [, startTransition] = useTransition();
 
@@ -48,7 +44,11 @@ const TaskList = ({ initialData }: TaskListProps) => {
     (params: Record<string, string>) => {
       const newParams = new URLSearchParams(searchParams.toString());
       for (const [key, value] of Object.entries(params)) {
-        newParams.set(key, value);
+        if (value === "") {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
       }
       return newParams.toString();
     },
@@ -61,11 +61,18 @@ const TaskList = ({ initialData }: TaskListProps) => {
     });
   };
 
-  const handleSortChange = (value: string | null) => {
+  const handleFilterChange = (value: FilterPreset | null) => {
     if (!value) return;
-    const [sort, order] = value.split("-") as [SortField, SortOrder];
     startTransition(() => {
-      router.push(`/tasks?${createQueryString({ sort, order, page: "1" })}`);
+      const params: Record<string, string> = { filter: value, page: "1" };
+      if (value === "all") {
+        params.sort = currentSort;
+        params.order = currentOrder;
+      } else {
+        params.sort = "";
+        params.order = "";
+      }
+      router.push(`/tasks?${createQueryString(params)}`);
     });
   };
 
@@ -75,11 +82,10 @@ const TaskList = ({ initialData }: TaskListProps) => {
   };
 
   const { tasks, total, page, totalPages } = initialData;
-  const sortValue = `${currentSort}-${currentOrder}`;
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Sort controls */}
+      {/* Filter controls */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm">
           {total === 0 ? "No tasks" : `${total} task${total !== 1 ? "s" : ""}`}
@@ -87,14 +93,14 @@ const TaskList = ({ initialData }: TaskListProps) => {
 
         <div className="flex items-center gap-2">
           <Select
-            value={sortValue}
-            onValueChange={handleSortChange}>
-            <SelectTrigger className="w-44">
-              <ArrowUpDown className="h-4 w-4" />
-              <SelectValue placeholder="Sort by" />
+            value={currentFilter}
+            onValueChange={handleFilterChange}>
+            <SelectTrigger className="w-40">
+              <Filter className="h-4 w-4" />
+              <SelectValue placeholder="Filter" />
             </SelectTrigger>
             <SelectContent>
-              {sortOptions.map((option) => (
+              {filterOptions.map((option) => (
                 <SelectItem
                   key={option.value}
                   value={option.value}>

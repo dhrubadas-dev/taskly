@@ -38,14 +38,19 @@ export async function createTask(values: CreateTaskFormData) {
   return task;
 }
 
+type FilterPreset =
+  "urgent" | "today" | "yesterday" | "upcoming" | "no-date" | "all";
+
 export async function getTasks({
   page = 1,
   pageSize = 20,
+  filter = "all",
   sort = "dueDate",
   sortOrder = "asc",
 }: {
   page?: number;
   pageSize?: number;
+  filter?: FilterPreset;
   sort?: "dueDate" | "priority" | "createdAt";
   sortOrder?: "asc" | "desc";
 } = {}) {
@@ -54,29 +59,65 @@ export async function getTasks({
 
   const skip = (page - 1) * pageSize;
 
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const where: Record<string, unknown> = { userId: session.user.id };
+
+  switch (filter) {
+    case "urgent":
+      where.dueDate = { lte: tomorrow };
+      break;
+    case "today":
+      where.dueDate = { gte: today, lt: tomorrow };
+      break;
+    case "yesterday":
+      where.dueDate = { gte: yesterday, lt: today };
+      break;
+    case "upcoming":
+      where.dueDate = { gt: tomorrow };
+      break;
+    case "no-date":
+      where.dueDate = null;
+      break;
+    case "all":
+    default:
+      break;
+  }
+
+  const effectiveSort =
+    filter !== "all" && filter !== "no-date" ? "dueDate" : sort;
+  const effectiveOrder =
+    filter !== "all" && filter !== "no-date" ? "asc" : sortOrder;
+
   const orderByMap: Record<string, "asc" | "desc"> = {
-    dueDate: sortOrder,
-    priority: sortOrder,
-    createdAt: sortOrder,
+    dueDate: effectiveOrder,
+    priority: effectiveOrder,
+    createdAt: effectiveOrder,
   };
 
-  const orderByField = sort === "createdAt" ? "createdAt" : sort;
+  const orderByField =
+    effectiveSort === "createdAt" ? "createdAt" : effectiveSort;
 
   const [tasks, total] = await Promise.all([
     prisma.task.findMany({
-      where: { userId: session.user.id },
+      where,
       include: {
         project: { select: { id: true, name: true, color: true } },
         subtasks: { select: { id: true, title: true, completed: true } },
       },
       orderBy:
-        sort === "priority" ?
-          [{ priority: sortOrder }, { dueDate: "asc" }]
+        effectiveSort === "priority" ?
+          [{ priority: effectiveOrder }, { dueDate: "asc" }]
         : [{ [orderByField]: orderByMap[orderByField] }, { createdAt: "desc" }],
       skip,
       take: pageSize,
     }),
-    prisma.task.count({ where: { userId: session.user.id } }),
+    prisma.task.count({ where }),
   ]);
 
   const totalPages = Math.ceil(total / pageSize);
