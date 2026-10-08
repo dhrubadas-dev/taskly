@@ -36,6 +36,9 @@ model Project {
   tasks     Task[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([ownerId, createdAt])
 }
 
 model Task {
@@ -52,6 +55,16 @@ model Task {
   subtasks    Subtask[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, dueDate])
+  @@index([userId, priority])
+  @@index([userId, createdAt])
+  @@index([userId, completed])
+  @@index([projectId])
+  @@index([projectId, completed])
+  @@index([dueDate])
+  @@index([completed])
 }
 
 model Subtask {
@@ -62,6 +75,9 @@ model Subtask {
   task      Task     @relation(fields: [taskId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([taskId, completed])
 }
 
 enum Priority {

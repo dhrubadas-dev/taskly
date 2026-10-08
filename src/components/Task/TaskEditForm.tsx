@@ -25,9 +25,9 @@ import {
   SelectValue,
 } from "@/components/shadcnui/select";
 import { Textarea } from "@/components/shadcnui/textarea";
-import { createTaskSchema, type CreateTaskFormData } from "@/lib/zodSchema";
+import { editTaskFormSchema, type EditTaskFormData } from "@/lib/zodSchema";
 import { getProjects } from "@/server/projects";
-import { createTask } from "@/server/tasks";
+import { getTaskById, updateTask } from "@/server/tasks";
 
 const priorityOptions = [
   { value: "HIGH", label: "High", icon: Flag, color: "text-red-500" },
@@ -35,7 +35,13 @@ const priorityOptions = [
   { value: "LOW", label: "Low", icon: Flag, color: "text-green-500" },
 ] as const;
 
-const TaskCreateForm = () => {
+type Task = Awaited<ReturnType<typeof getTaskById>>;
+
+type TaskEditFormProps = {
+  task: Task;
+};
+
+const TaskEditForm = ({ task }: TaskEditFormProps) => {
   const router = useRouter();
   const [projects, setProjects] = useState<
     Awaited<ReturnType<typeof getProjects>>
@@ -53,30 +59,27 @@ const TaskCreateForm = () => {
     handleSubmit,
     control,
     formState: { isSubmitting },
-  } = useForm<CreateTaskFormData>({
-    resolver: zodResolver(createTaskSchema),
+  } = useForm<EditTaskFormData>({
+    resolver: zodResolver(editTaskFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      priority: undefined,
-      dueDate: null,
-      projectId: "",
+      title: task.title,
+      description: task.description ?? "",
+      priority: task.priority,
+      dueDate: task.dueDate ? new Date(task.dueDate) : null,
+      projectId: task.projectId,
     },
     mode: "all",
   });
 
-  const onSubmit = async (values: CreateTaskFormData) => {
+  const onSubmit = async (values: EditTaskFormData) => {
     try {
-      const data = {
-        ...values,
-        priority: values.priority ?? "MEDIUM",
-      };
-      await createTask(data);
-      toast.success("Task created successfully");
-      router.push("/tasks");
+      await updateTask(task.id, values);
+      toast.success("Task updated successfully");
+      router.push(`/tasks/${task.id}`);
+      router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to create task",
+        error instanceof Error ? error.message : "Failed to update task",
       );
     }
   };
@@ -240,13 +243,22 @@ const TaskCreateForm = () => {
         )}
       />
 
-      <Button
-        type="submit"
-        disabled={isSubmitting}>
-        {isSubmitting ? "Creating..." : "Create Task"}
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.back()}
+          disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
     </form>
   );
 };
 
-export default TaskCreateForm;
+export default TaskEditForm;
